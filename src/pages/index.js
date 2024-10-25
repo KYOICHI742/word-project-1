@@ -3,8 +3,8 @@ import { createClient } from '@supabase/supabase-js';
 import Link from 'next/link';
 
 // Supabaseクライアントの作成
-const supabaseUrl = 'https://your-supabase-url.supabase.co';
-const supabaseKey = 'your-supabase-key';
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 export default function WordLearningApp() {
