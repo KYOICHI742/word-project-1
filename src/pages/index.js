@@ -20,19 +20,29 @@ export default function WordLearningApp() {
 
   // 初期データの読み込み
   useEffect(() => {
-    const session = supabase.auth.session();
-    setUser(session?.user ?? null);
+    const fetchSession = async () => {
+      const { data, error } = await supabase.auth.getSession();
+      if (error) {
+        console.error('Error getting session:', error);
+      } else {
+        setUser(data?.session?.user ?? null);
+      }
+    };
 
-    supabase.auth.onAuthStateChange((_event, session) => {
+    fetchSession();
+
+    // 認証状態の変更を監視する
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchWords();  // ユーザーが存在する場合、単語データを取得
       }
     });
 
-    if (session) {
-      fetchWords();  // 初期データの取得
-    }
+    // クリーンアップ処理
+    return () => {
+      authListener?.unsubscribe();
+    };
   }, []);
 
   // 単語データを取得
@@ -110,7 +120,7 @@ export default function WordLearningApp() {
 
   // ユーザーログイン
   const handleLogin = async () => {
-    const { user, error } = await supabase.auth.signIn({
+    const { user, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
